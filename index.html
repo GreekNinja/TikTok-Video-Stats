@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Stats</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.cdnfonts.com/css/burbank-big-condensed');
+
+        body {
+            font-family: 'Burbank Big Condensed', sans-serif;
+            background: linear-gradient(135deg, #000428, #004e92);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stats div {
+            font-size: 36px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+            transition: transform 0.3s ease-in-out;
+            min-width: 150px;
+        }
+
+        .stats div:hover {
+            transform: scale(1.1);
+        }
+
+        .stats p {
+            font-size: 22px;
+            margin: 5px 0;
+        }
+
+        .info {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+
+        img {
+            width: 200px;
+            height: 200px;
+            border-radius: 10px;
+            margin-top: 10px;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+        }
+
+        a, button {
+            display: block;
+            margin: 10px auto;
+            padding: 15px;
+            background: linear-gradient(135deg, #ff00ff, #ff1493);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 80%;
+            text-align: center;
+            font-size: 22px;
+        }
+
+        a:hover, button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.8);
+        }
+
+        input {
+            width: 80%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        #statsContainer {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>📊 TikTok Video Stats</h2>
+        <input type="text" id="videoUrl" placeholder="Paste TikTok video URL">
+        <button id="searchButton" onclick="startFetchingData()">Get Video Stats</button>
+        
+        <div id="statsContainer">
+            <img id="cover" src="" alt="Video Cover">
+            <p class="info"><strong>Creator:</strong> <span id="creator">-</span></p>
+            <p class="info"><strong>Description:</strong> <span id="desc">-</span></p>
+            <p class="info"><strong>Date:</strong> <span id="date">-</span></p>
+
+            <div class="stats">
+                <div>👁️ <p>Views</p><p id="views">0</p></div>
+                <div>❤️ <p>Likes</p><p id="likes">0</p></div>
+                <div>🔄 <p>Shares</p><p id="shares">0</p></div>
+                <div>💬 <p>Comments</p><p id="comments">0</p></div>
+            </div>
+
+            <p class="info"><strong>🎵 Music:</strong> <span id="music_title">-</span> by <span id="music_artist">-</span></p>
+            <button id="playButton" onclick="playMusic()">▶️ Play Music</button>
+            <a id="downloadMP3" href="#" target="_blank">🎶 Download MP3</a>
+            <a id="download" href="#" target="_blank">⬇️ Download Video</a>
+        </div>
+    </div>
+
+    <script>
+        let lastStats = { views: 0, likes: 0, shares: 0, comments: 0 };
+let intervalId;
+let musicAudio = null;
+
+function animateCounter(element, target, previous) {
+    // Only animate if the target is different from the previous value
+    if (target !== previous) {
+        let current = previous;
+        const increment = Math.ceil((target - previous) / 100);
+        const interval = setInterval(() => {
+            current += increment;
+            if ((increment > 0 && current >= target) || (increment < 0 && current <= target)) {
+                current = target;
+                clearInterval(interval);
+            }
+            element.innerText = current.toLocaleString();
+        }, 20);
+    } else {
+        // If there's no change, just update the number immediately
+        element.innerText = target.toLocaleString();
+    }
+}
+
+async function fetchVideoData() {
+    const urlInput = document.getElementById('videoUrl').value;
+    const match = urlInput.match(/video\/(\d+)/);
+    if (!match) {
+        alert('Invalid TikTok URL');
+        return;
+    }
+    const videoId = match[1];
+    try {
+        const response = await fetch(`https://countik.com/api/videoinfo/${videoId}`);
+        const data = await response.json();
+        displayData(data);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
+function displayData(data) {
+    // Reset the stats container and update all values
+    document.getElementById('statsContainer').style.display = 'block';
+    document.getElementById('creator').innerText = data.creator;
+    document.getElementById('desc').innerText = data.desc;
+    document.getElementById('date').innerText = data.create_date;
+    document.getElementById('cover').src = data.cover;
+    document.getElementById('download').href = data.download_link;
+    document.getElementById('music_title').innerText = data.music_title;
+    document.getElementById('music_artist').innerText = data.music_artist;
+    document.getElementById('downloadMP3').href = data.music_play_url;
+
+    // Only animate if the new values are different from the previous ones
+    animateCounter(document.getElementById('views'), data.plays, lastStats.views);
+    animateCounter(document.getElementById('likes'), data.likes, lastStats.likes);
+    animateCounter(document.getElementById('shares'), data.shares, lastStats.shares);
+    animateCounter(document.getElementById('comments'), data.comments, lastStats.comments);
+
+    // Update last stats for future reference
+    lastStats.views = data.plays || 0;
+    lastStats.likes = data.likes || 0;
+    lastStats.shares = data.shares || 0;
+    lastStats.comments = data.comments || 0;
+
+    // After fetching, change the button text back to "Play Music"
+    document.getElementById('playButton').innerText = '▶️ Play Music';
+}
+
+function startFetchingData() {
+    fetchVideoData();
+    // Start the interval to fetch data every 10 seconds
+    intervalId = setInterval(fetchVideoData, 10000); // 10000 ms = 10 seconds
+}
+
+function stopFetchingData() {
+    // Clear the interval when you no longer need it
+    clearInterval(intervalId);
+}
+
+function playMusic() {
+    const musicUrl = document.getElementById('downloadMP3').href;
+
+    if (musicAudio && !musicAudio.paused) {
+        // Stop the music if it is playing
+        musicAudio.pause();
+        musicAudio.currentTime = 0;  // Reset to the beginning
+        document.getElementById('playButton').innerText = "▶️ Play Music";  // Change button text to Play
+    } else {
+        // Play the music if it's not playing
+        musicAudio = new Audio(musicUrl);
+        musicAudio.play();
+        document.getElementById('playButton').innerText = "⏹️ Stop Music";  // Change button text to Stop
+    }
+}
+
+    </script>
+</body>
+</html>
