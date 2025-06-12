@@ -3,25 +3,76 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Video Stats</title>
+<title>Live TikTok Video Stats</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
+    /* Estilos Generales */
     body {
         background-color: #1a1a2e;
         color: #e0e0e0;
-        font-family: Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
+        min-height: 100vh;
         margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
     }
+
+    /* Contenedor principal */
+    .main-container {
+        width: 800px;
+        max-width: 100%;
+    }
+
+    /* Sección de búsqueda */
+    .search-box {
+        background-color: #2c3e50;
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    .search-box h2 {
+        margin-top: 0;
+        color: #fff;
+    }
+    #videoId {
+        width: 80%;
+        padding: 12px;
+        border-radius: 5px;
+        border: 2px solid #34495e;
+        background-color: #1a1a2e;
+        color: #fff;
+        font-size: 1em;
+    }
+    #fetchBtn {
+        background-color: #2ecc71;
+        color: #fff;
+        border: none;
+        padding: 12px 25px;
+        font-size: 1.1em;
+        font-weight: bold;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin-top: 15px;
+    }
+    #fetchBtn:hover {
+        background-color: #27ae60;
+    }
+    #errorMessage {
+        color: #e74c3c;
+        margin-top: 15px;
+        min-height: 20px;
+    }
+
+    /* Contenedor de estadísticas (el diseño de la imagen) */
     .video-container {
         background-color: #2c3e50;
         border-radius: 15px;
         padding: 40px;
-        width: 800px;
-        max-width: 90%;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         text-align: center;
     }
@@ -34,10 +85,11 @@
         border-radius: 50%;
         border: 2px solid #e74c3c;
         position: absolute;
-        top: -70px; /* Ajusta para que quede por encima del título */
+        top: -70px;
         left: 50%;
         transform: translateX(-50%);
         overflow: hidden;
+        background-color: #1a1a2e;
     }
     .profile-pic img {
         width: 100%;
@@ -48,8 +100,9 @@
         font-size: 2em;
         font-weight: bold;
         color: #ffffff;
-        margin-top: 30px; /* Espacio para la foto de perfil */
+        margin-top: 30px;
         margin-bottom: 5px;
+        word-wrap: break-word;
     }
     .video-creator {
         color: #bdc3c7;
@@ -71,6 +124,8 @@
         display: flex;
         justify-content: space-around;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
         margin-bottom: 40px;
     }
     .stat-item {
@@ -106,47 +161,157 @@
     .change-video-btn i {
         margin-left: 8px;
     }
+    
+    /* Clase para ocultar elementos */
+    .hidden {
+        display: none;
+    }
 </style>
 </head>
 <body>
 
-<div class="video-container">
-    <div class="video-header">
-        <div class="profile-pic">
-            <img src="https://p16-amd-va.tiktokcdn.com/tos-maliva-avt-0068/2850cb908e92d623c3e40257b277ae09~tplv-tiktokx-cropcenter-q:720:720:q75.webp?dr=10795&idc=maliva&ps=87d6e48a&s=AWEME_DETAIL&sc=avatar&shcp=1d1a97fc&shp=d05b14bd&t=223449c4" alt="Profile Picture">
-        </div>
-        <h1 class="video-title">Η Απίθανη Γιαγιά που Πηδάει μέσα στη Λάβα!#Greek...</h1>
-        <p class="video-creator">@7515124543250304278</p>
+<div class="main-container">
+
+    <div id="searchSection" class="search-box">
+        <h2>Introduce el ID del vídeo de TikTok</h2>
+        <input type="text" id="videoId" placeholder="Ej: 7514997965665389846" />
+        <br>
+        <button id="fetchBtn">Obtener Estadísticas</button>
+        <p id="errorMessage"></p>
     </div>
 
-    <div class="views-count">204</div>
-    <p class="views-label">Views <i class="far fa-eye"></i></p>
+    <div id="resultsSection" class="video-container hidden">
+        <div class="video-header">
+            <div class="profile-pic">
+                <img id="profilePic" src="" alt="Profile Picture">
+            </div>
+            <h1 id="videoTitle" class="video-title">---</h1>
+            <p id="videoCreator" class="video-creator">@---</p>
+        </div>
 
-    <div class="stats-container">
-        <div class="stat-item">
-            <div class="stat-value">9</div>
-            <div class="stat-label">
-                <i class="fas fa-heart" style="color: #e74c3c;"></i> Likes
+        <div id="viewsCount" class="views-count">---</div>
+        <p class="views-label">Views <i class="far fa-eye"></i></p>
+
+        <div class="stats-container">
+            <div class="stat-item">
+                <div id="likesCount" class="stat-value">--</div>
+                <div class="stat-label">
+                    <i class="fas fa-heart" style="color: #e74c3c;"></i> Likes
+                </div>
+            </div>
+            <div class="stat-item">
+                <div id="commentsCount" class="stat-value">--</div>
+                <div class="stat-label">
+                    <i class="fas fa-comment-dots"></i> Comments
+                </div>
+            </div>
+            <div class="stat-item">
+                <div id="sharesCount" class="stat-value">--</div>
+                <div class="stat-label">
+                    <i class="fas fa-share-square"></i> Shares
+                </div>
             </div>
         </div>
-        <div class="stat-item">
-             <div class="stat-value">3</div>
-            <div class="stat-label">
-                 <i class="fas fa-comment-dots"></i> Comments
-            </div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-value">0</div>
-            <div class="stat-label">
-                 <i class="fas fa-share-square"></i> Shares
-            </div>
-        </div>
+
+        <button id="changeVideoBtn" class="change-video-btn">
+            Buscar Otro Vídeo <i class="fas fa-search"></i>
+        </button>
     </div>
 
-    <button class="change-video-btn">
-        Change Video <i class="fas fa-search"></i>
-    </button>
 </div>
+
+<script>
+    // Referencias a los elementos del DOM
+    const searchSection = document.getElementById('searchSection');
+    const resultsSection = document.getElementById('resultsSection');
+    const fetchBtn = document.getElementById('fetchBtn');
+    const changeVideoBtn = document.getElementById('changeVideoBtn');
+    const videoIdInput = document.getElementById('videoId');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // Función para actualizar la UI con los datos de la API
+    const updateUI = (data) => {
+        // Formatear números grandes con comas (ej. 1000 -> 1,000)
+        const formatNumber = (num) => new Intl.NumberFormat('en-US').format(num);
+
+        // Actualizar cada elemento con los datos recibidos
+        document.getElementById('profilePic').src = data.music_avatar;
+        document.getElementById('videoTitle').innerText = data.desc || "Sin descripción";
+        document.getElementById('videoCreator').innerText = `@${data.creator}`;
+        document.getElementById('viewsCount').innerText = formatNumber(data.plays);
+        document.getElementById('likesCount').innerText = formatNumber(data.likes);
+        document.getElementById('commentsCount').innerText = formatNumber(data.comments);
+        document.getElementById('sharesCount').innerText = formatNumber(data.shares);
+    };
+
+    // Función para hacer la llamada a la API
+    const fetchVideoInfo = async () => {
+        const videoId = videoIdInput.value.trim();
+        if (!videoId) {
+            errorMessage.innerText = "Por favor, introduce un ID de vídeo.";
+            return;
+        }
+
+        // Mostrar estado de carga y limpiar errores
+        fetchBtn.disabled = true;
+        fetchBtn.innerText = "Cargando...";
+        errorMessage.innerText = "";
+        
+        // --- AVISO IMPORTANTE SOBRE CORS ---
+        // La API de countik.com puede tener restricciones (CORS) que impidan
+        // llamarla directamente desde un navegador. Para solucionar esto en un
+        // entorno real, se usaría un proxy. Aquí añadimos un proxy gratuito
+        // para que la llamada funcione en el navegador del cliente.
+        const apiUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://countik.com/api/videoinfo/${videoId}`)}`;
+
+        try {
+            const response = await fetch(apiUrl);
+            if (!response.ok) {
+                throw new Error('Error de red al contactar el proxy.');
+            }
+            
+            // El proxy envuelve la respuesta, así que la extraemos de 'contents'
+            const apiData = await response.json();
+            const data = JSON.parse(apiData.contents);
+
+            if (data.status === "success") {
+                // Si la API responde con éxito, actualiza la UI y cambia de vista
+                updateUI(data);
+                searchSection.classList.add('hidden');
+                resultsSection.classList.remove('hidden');
+            } else {
+                // Si la API indica un error (ej. vídeo no encontrado)
+                errorMessage.innerText = data.message || "No se pudo encontrar el vídeo. Verifica el ID.";
+            }
+        } catch (error) {
+            // Si hay un error de red o al procesar los datos
+            console.error("Error en la llamada a la API:", error);
+            errorMessage.innerText = "Ocurrió un error. Es posible que la API no esté disponible o el ID sea incorrecto.";
+        } finally {
+            // Reactivar el botón
+            fetchBtn.disabled = false;
+            fetchBtn.innerText = "Obtener Estadísticas";
+        }
+    };
+
+    // Función para volver a la pantalla de búsqueda
+    const resetView = () => {
+        resultsSection.classList.add('hidden');
+        searchSection.classList.remove('hidden');
+        videoIdInput.value = ""; // Limpiar el campo de texto
+        errorMessage.innerText = "";
+    };
+
+    // Asignar los eventos a los botones
+    fetchBtn.addEventListener('click', fetchVideoInfo);
+    changeVideoBtn.addEventListener('click', resetView);
+    // Permitir búsqueda al presionar Enter en el campo de texto
+    videoIdInput.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+            fetchBtn.click();
+        }
+    });
+</script>
 
 </body>
 </html>
