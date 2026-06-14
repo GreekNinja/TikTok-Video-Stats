@@ -39,7 +39,6 @@
   }
   .wrap { max-width: 1100px; margin: 0 auto; }
 
-  /* Universal text wrapping fix */
   .wrap, .wrap * {
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -47,7 +46,6 @@
     min-width: 0;
   }
 
-  /* HEADER */
   .header {
     display: flex;
     justify-content: space-between;
@@ -82,9 +80,7 @@
     transition: all 0.2s;
   }
   .icon-btn:hover { transform: translateY(-2px); border-color: var(--accent); }
-  .icon-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
 
-  /* SEARCH */
   .search-card {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -132,7 +128,6 @@
   }
   .search-row button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* Live toggle */
   .live-controls {
     display: flex;
     gap: 12px;
@@ -208,37 +203,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Custom API */
-  .api-config {
-    display: none;
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
-    animation: slideDown 0.3s ease;
-  }
-  .api-config.open { display: block; }
-  .api-config label {
-    font-size: 12px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: block;
-    margin-bottom: 6px;
-  }
-  .api-config input {
-    width: 100%;
-    background: var(--panel-2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-family: ui-monospace, "SF Mono", monospace;
-    outline: none;
-  }
-  .api-config small { color: var(--text-dim); font-size: 11px; display: block; margin-top: 6px; }
-
-  /* History panel (slide-in) */
   .history-panel {
     position: fixed;
     top: 0;
@@ -314,7 +278,6 @@
   }
   .overlay.show { opacity: 1; pointer-events: auto; }
 
-  /* STATUS */
   .status { text-align: center; padding: 30px; color: var(--text-dim); }
   .spinner {
     display: inline-block;
@@ -343,7 +306,6 @@
     75% { transform: translateX(8px); }
   }
 
-  /* RESULTS */
   .result { display: none; animation: fadeIn 0.5s ease; }
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(15px); }
@@ -357,7 +319,6 @@
   }
   @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
 
-  /* VIDEO PANEL */
   .video-panel {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -424,7 +385,6 @@
     transform: translateY(-2px);
   }
 
-  /* INFO PANEL */
   .info-panel {
     display: flex;
     flex-direction: column;
@@ -495,7 +455,6 @@
   .caption .copy-btn:hover { color: var(--text); }
   .hashtag { color: var(--accent-2); }
 
-  /* STATS GRID */
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -567,7 +526,6 @@
     margin-top: 2px;
   }
 
-  /* ANALYTICS */
   .analytics {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -610,7 +568,6 @@
     width: 0;
   }
 
-  /* META */
   .meta-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -636,7 +593,6 @@
 
   .full-row { grid-column: 1 / -1; }
 
-  /* Toast */
   .toast {
     position: fixed;
     bottom: 24px;
@@ -661,7 +617,6 @@
   <div class="header">
     <div class="logo">⚡ TikTok Analytics Pro</div>
     <div class="header-actions">
-      <button class="icon-btn" onclick="toggleApiConfig()" id="apiBtn" title="API settings">⚙️</button>
       <button class="icon-btn" onclick="openHistory()" title="History">🕘</button>
       <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Theme">🌙</button>
     </div>
@@ -689,12 +644,6 @@
         <span>LIVE</span>
       </span>
       <span class="countdown" id="countdown"></span>
-    </div>
-
-    <div class="api-config" id="apiConfig">
-      <label>Custom API endpoint (optional)</label>
-      <input type="text" id="apiInput" placeholder="https://www.tikwm.com/api/">
-      <small>Default: <code>https://www.tikwm.com/api/</code> — must accept <code>?url=</code> and return TikWM-compatible JSON.</small>
     </div>
   </div>
 
@@ -810,7 +759,6 @@
   </div>
 </div>
 
-<!-- History panel -->
 <div class="overlay" id="overlay" onclick="closeHistory()"></div>
 <aside class="history-panel" id="historyPanel">
   <h3>
@@ -825,8 +773,8 @@
 
 <script>
 const $ = id => document.getElementById(id);
+const API_BASE = 'https://www.tikwm.com/api/';
 
-// ---------- Formatting ----------
 function formatNumber(n) {
   if (n == null) return '-';
   if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
@@ -862,7 +810,6 @@ function highlightHashtags(text) {
   return (text || '').replace(/(#[\w\u0370-\u03FF\u0400-\u04FF]+)/g, '<span class="hashtag">$1</span>');
 }
 
-// ---------- Toast ----------
 function toast(msg) {
   const t = $('toast');
   t.textContent = msg;
@@ -870,7 +817,6 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// ---------- Theme ----------
 function toggleTheme() {
   const cur = document.documentElement.getAttribute('data-theme');
   const next = cur === 'light' ? 'dark' : 'light';
@@ -885,28 +831,6 @@ function toggleTheme() {
   $('themeBtn').textContent = saved === 'light' ? '☀️' : '🌙';
 })();
 
-// ---------- Custom API ----------
-function getApiBase() {
-  let saved = '';
-  try { saved = localStorage.getItem('tt_api') || ''; } catch(e) {}
-  return saved || 'https://www.tikwm.com/api/';
-}
-function toggleApiConfig() {
-  const cfg = $('apiConfig');
-  cfg.classList.toggle('open');
-  $('apiBtn').classList.toggle('active');
-  $('apiInput').value = getApiBase();
-}
-$('apiInput')?.addEventListener('change', e => {
-  const v = e.target.value.trim();
-  try {
-    if (v) localStorage.setItem('tt_api', v);
-    else localStorage.removeItem('tt_api');
-  } catch(e) {}
-  toast('API endpoint saved');
-});
-
-// ---------- History ----------
 function getHistory() {
   try { return JSON.parse(localStorage.getItem('tt_history') || '[]'); } catch(e) { return []; }
 }
@@ -956,13 +880,11 @@ function clearHistory() {
 function openHistory() { renderHistory(); $('historyPanel').classList.add('open'); $('overlay').classList.add('show'); }
 function closeHistory() { $('historyPanel').classList.remove('open'); $('overlay').classList.remove('show'); }
 
-// ---------- Copy ----------
 function copyCaption() {
   const text = $('caption').innerText;
   navigator.clipboard.writeText(text).then(() => toast('Caption copied'));
 }
 
-// ---------- Video play ----------
 let currentVideoUrl = '';
 function playVideo() {
   if (!currentVideoUrl) return;
@@ -970,7 +892,6 @@ function playVideo() {
   preview.innerHTML = `<video src="${currentVideoUrl}" controls autoplay></video>`;
 }
 
-// ---------- Live refresh ----------
 let liveOn = false;
 let liveTimer = null;
 let countdownTimer = null;
@@ -1008,7 +929,6 @@ function updateCountdown() {
   $('countdown').textContent = `Next refresh in ${sec}s`;
 }
 
-// ---------- Stat updates with animation ----------
 let previousStats = null;
 function animateNumber(el, from, to, duration = 800) {
   if (from === to) { el.textContent = formatNumber(to); return; }
@@ -1046,7 +966,6 @@ function updateStat(key, newVal, isLive) {
   rawEl.textContent = formatRaw(newVal);
 }
 
-// ---------- Fetch ----------
 async function fetchStats(isLive = false) {
   const url = $('urlInput').value.trim();
   const status = $('status');
@@ -1066,9 +985,7 @@ async function fetchStats(isLive = false) {
   }
 
   try {
-    const base = getApiBase();
-    const sep = base.includes('?') ? '&' : '?';
-    const apiUrl = base + sep + 'url=' + encodeURIComponent(url) + '&hd=1';
+    const apiUrl = API_BASE + '?url=' + encodeURIComponent(url) + '&hd=1';
     const res = await fetch(apiUrl);
     const json = await res.json();
     if (json.code !== 0 || !json.data) throw new Error(json.msg || 'Could not fetch this video.');
@@ -1081,19 +998,16 @@ async function fetchStats(isLive = false) {
     const saves = d.collect_count || 0;
     const dls = d.download_count || 0;
 
-    // Save to history
     saveHistoryItem({
       url, author: '@' + (d.author?.unique_id || ''),
       avatar: d.author?.avatar || '', views, likes, ts: Date.now()
     });
 
-    // Author
     $('avatar').src = d.author?.avatar || '';
     $('authorName').textContent = d.author?.nickname || '';
     $('authorHandle').textContent = '@' + (d.author?.unique_id || '');
     $('caption').innerHTML = highlightHashtags(d.title || '(no caption)');
 
-    // Cover + downloads
     if (!isLive) {
       $('cover').src = d.cover || d.origin_cover || '';
       currentVideoUrl = d.play || '';
@@ -1102,7 +1016,6 @@ async function fetchStats(isLive = false) {
     $('dlHD').href = d.hdplay || d.play || '#';
     $('dlAudio').href = d.music || '#';
 
-    // Stats with animation
     updateStat('views', views, isLive);
     updateStat('likes', likes, isLive);
     updateStat('comments', comments, isLive);
@@ -1112,7 +1025,6 @@ async function fetchStats(isLive = false) {
 
     previousStats = { views, likes, comments, shares, saves, downloads: dls };
 
-    // Engagement
     const engagements = likes + comments + shares + saves;
     const engRate = pct(engagements, views);
     const likeRate = pct(likes, views);
@@ -1135,7 +1047,6 @@ async function fetchStats(isLive = false) {
       $('saveBar').style.width = Math.min(saveRate * 25, 100) + '%';
     });
 
-    // Meta
     $('duration').textContent = (d.duration || 0) + 's';
     $('region').textContent = d.region || '-';
     $('createTime').textContent = formatDate(d.create_time);
@@ -1160,7 +1071,6 @@ async function fetchStats(isLive = false) {
   }
 }
 
-// Enter key
 $('urlInput').addEventListener('keydown', e => { if (e.key === 'Enter') fetchStats(); });
 </script>
 </body>
