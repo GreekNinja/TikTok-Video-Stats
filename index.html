@@ -1064,7 +1064,7 @@ async function fetchStats(isLive = false) {
     if (!isLive) {
       status.innerHTML = '<div class="error">❌ ' + err.message + '</div>';
     } else {
-      toast('⚠️ Refresh failed: ' + err.message);
+      toast('⚠️ Refresh failed.: ' + err.message);
     }
   } finally {
     btn.disabled = false;
